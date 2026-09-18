@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="OrthoVoice AI - ระบบบันทึกเวชระเบียนอัจฉริยะและเสียงสั่งการตรวจรักษาสำหรับแพทย์กระดูกและข้อ (Orthopedic Ambient Scribe & Text-to-Voice)">
+  <title>OrthoVoice AI — ระบบตรวจรักษาออร์โธปิดิกส์อัจฉริยะ (Ambient Scribe & Text-to-Voice)</title>
+  
+  <!-- Google Fonts: Plus Jakarta Sans & Prompt for elegant Thai-English medical typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="theme-dark">
+  <!-- Main Application Wrapper -->
+  <div class="app-container">
+    
+    <!-- Top Navigation & Header -->
+    <header class="app-header">
+      <div class="brand-group">
+        <div class="brand-icon-wrapper">
+          <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2a5 5 0 0 0-5 5v3a5 5 0 0 0 10 0V7a5 5 0 0 0-5-5z" />
+            <path d="M19 10v1a7 7 0 0 1-14 0v-1" />
+            <line x1="12" y1="18" x2="12" y2="22" />
+            <line x1="8" y1="22" x2="16" y2="22" />
+            <circle cx="18" cy="4" r="2" fill="currentColor" opacity="0.8" />
+            <circle cx="6" cy="4" r="2" fill="currentColor" opacity="0.8" />
+          </svg>
+        </div>
+        <div class="brand-text">
+          <div class="brand-title">OrthoVoice <span class="badge-ai">AI Scribe</span></div>
+          <div class="brand-subtitle">ระบบถอดความการตรวจรักษาเฉพาะทางกระดูกและข้อ & ผู้ช่วยเสียงอัจฉริยะ</div>
+        </div>
+      </div>
+
+      <!-- Header Actions & Status -->
+      <div class="header-actions">
+        <!-- Live Status Badge -->
+        <div class="status-indicator" id="systemStatus">
+          <span class="pulse-dot"></span>
+          <span class="status-label">พร้อมรับฟัง (Ready)</span>
+        </div>
+
+        <!-- Scenario Selector Quick Action -->
+        <div class="scenario-dropdown-wrapper">
+          <label for="scenarioSelect" class="sr-only">เลือกเคสตัวอย่าง</label>
+          <select id="scenarioSelect" class="scenario-select" title="เลือกเคสตัวอย่างเพื่อจำลองการสนทนา">
+            <option value="">⚡ เลือกเคสตัวอย่าง (Demo Scenarios)...</option>
+            <option value="oa_knee">🦵 1. ข้อเข่าเสื่อม (OA Knee Grade 3)</option>
+            <option value="acl_tear">🏃‍♂️ 2. เอ็นไขว้หน้าข้อเข่าฉีก (ACL Tear + Meniscus)</option>
+            <option value="lumbar_hnp">⚡ 3. หมอนรองกระดูกทับเส้น (Lumbar HNP / Sciatica)</option>
+            <option value="rotator_cuff">💪 4. เอ็นข้อไหล่ฉีกขาด (Rotator Cuff Tear)</option>
+            <option value="trigger_finger">🖐️ 5. โรคนิ้วล็อค (Trigger Finger Gr.3)</option>
+          </select>
+          <button id="btnLoadScenario" class="btn btn-secondary btn-sm" title="โหลดและจำลองการสนทนา">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            จำลองสนทนา
+          </button>
+        </div>
+
+        <!-- Gemini API Key Modal Trigger -->
+        <button id="btnOpenConfig" class="btn btn-ghost" title="ตั้งค่าระบบ / API Key">
+          <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>ตั้งค่า</span>
+        </button>
+
+        <!-- Clear All Button -->
+        <button id="btnClearAll" class="btn btn-ghost btn-danger-hover" title="ล้างข้อมูลทั้งหมดเพื่อเริ่มเคสใหม่">
+          <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace Split: Left = Ambient Audio & Transcription / Right = Orthopedic SOAP & Voice Assistant -->
+    <main class="app-main">
+      
+      <!-- LEFT PANEL: Audio Ingestion, Waveform, Live Speech Dialogue -->
+      <section class="panel panel-left">
+        
+        <!-- Audio Control Center -->
+        <div class="audio-control-card">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="icon-bubble">🎙️</span>
+              <span>การบันทึกเสียงสนทนาต่อเนื่อง</span>
+            </div>
+            <div class="audio-mode-badge" id="audioModeBadge">Web Speech (TH/EN)</div>
+          </div>
+
+          <!-- Waveform Canvas Visualizer -->
+          <div class="visualizer-container">
+            <canvas id="waveformCanvas" width="500" height="70"></canvas>
+            <div class="mic-timer" id="recordingTimer">00:00</div>
+          </div>
+
+          <!-- Main Recording Buttons -->
+          <div class="recording-controls">
+            <button id="btnToggleRecord" class="btn btn-primary btn-record">
+              <span class="record-icon"></span>
+              <span id="recordBtnText">เริ่มรับฟังเสียง (Start Listening)</span>
+            </button>
+            <button id="btnPauseRecord" class="btn btn-secondary btn-icon" title="พักการบันทึกชั่วคราว" disabled>
+              <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
+                <rect x="6" y="4" width="4" height="16"></rect>
+                <rect x="14" y="4" width="4" height="16"></rect>
+              </svg>
+            </button>
+            <button id="btnAnalyzeNow" class="btn btn-accent" title="วิเคราะห์ประวัติและตรวจร่างกายทันที">
+              <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>
+              </svg>
+              <span>แยกข้อมูลการตรวจ (AI Parse)</span>
+            </button>
+          </div>
+
+          <!-- Audio / Speech Settings quick bar -->
+          <div class="speech-hints">
+            <span class="hint-item">💡 สามารถพูดภาษาไทยปนศัพท์เฉพาะทางแพทย์ได้ เช่น <em>Lachman test, Medial joint line, OA knee, Spurling, ROM</em></span>
+          </div>
+
+          <!-- Quick Scenario Pills -->
+          <div class="quick-scenarios-bar">
+            <span class="quick-scenarios-label">⚡ เคสตัวอย่างตรวจรักษา (คลิกเพื่อทดสอบทันที):</span>
+            <div class="quick-scenarios-pills">
+              <button class="pill-btn" data-scenario="oa_knee" title="ข้อเข่าเสื่อม Grade 3">🦵 ข้อเข่าเสื่อม</button>
+              <button class="pill-btn" data-scenario="acl_tear" title="เอ็นไขว้หน้าข้อเข่าฉีกขาด">🏃‍♂️ เอ็นไขว้หน้าฉีก</button>
+              <button class="pill-btn" data-scenario="lumbar_hnp" title="หมอนรองกระดูกทับเส้นประสาท">⚡ หมอนรองทับเส้น</button>
+              <button class="pill-btn" data-scenario="rotator_cuff" title="เอ็นข้อไหล่ฉีกขาด">💪 เอ็นไหล่ฉีก</button>
+              <button class="pill-btn" data-scenario="trigger_finger" title="โรคนิ้วล็อค">🖐️ นิ้วล็อค</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Dialogue & Transcript Stream -->
+        <div class="transcript-card">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="icon-bubble">💬</span>
+              <span>บทสนทนาแพทย์-ผู้ป่วย (Live Ambient Stream)</span>
+            </div>
+            <div class="transcript-actions">
+              <button id="btnManualAddText" class="btn-text-action" title="พิมพ์ข้อความเพิ่มเติมเอง">+ พิมพ์เอง</button>
+              <button id="btnCopyTranscript" class="btn-text-action" title="คัดลอกบทสนทนาดิบ">คัดลอก</button>
+            </div>
+          </div>
+
+          <!-- Transcript Scrollable Stream -->
+          <div class="transcript-stream" id="transcriptStream">
+            <div class="empty-state" id="transcriptEmptyState">
+              <div class="empty-icon">🩺</div>
+              <h4>ยังไม่มีเสียงหรือบทสนทนา</h4>
+              <p>กดปุ่ม <strong>"เริ่มรับฟังเสียง"</strong> เพื่อให้แพทย์และผู้ป่วยเริ่มสนทนา<br>หรือเลือก <strong>"เคสตัวอย่าง (Demo)"</strong> ด้านบนเพื่อทดสอบการทำงานทันที</p>
+            </div>
+          </div>
+
+          <!-- Manual Input Bar (Collapsible) -->
+          <div class="manual-input-box" id="manualInputBox" style="display: none;">
+            <div class="input-speaker-selector">
+              <label><input type="radio" name="speakerRadio" value="Doctor" checked> 👨‍⚕️ แพทย์</label>
+              <label><input type="radio" name="speakerRadio" value="Patient"> 🧑 ผู้ป่วย</label>
+            </div>
+            <div class="input-row">
+              <input type="text" id="manualTextInput" placeholder="พิมพ์ข้อความตรวจหรือซักประวัติ เช่น คนไข้ปวดเข่าขวามา 3 สัปดาห์ ตรวจ Lachman test positive..." />
+              <button id="btnSubmitManualText" class="btn btn-secondary btn-sm">เพิ่ม</button>
+            </div>
+          </div>
+
+          <!-- Detected Ortho Entities Chips Bar -->
+          <div class="entity-detect-bar">
+            <div class="entity-label">🔍 ตรวจพบศัพท์สำคัญ:</div>
+            <div class="entity-chips-container" id="entityChips">
+              <span class="chip-placeholder">ระบบจะตรวจจับชื่อข้อ อาการ การตรวจพิเศษ และยาอัตโนมัติ</span>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- RIGHT PANEL: Structured Orthopedic Medical Record & Voice Readback -->
+      <section class="panel panel-right">
+        
+        <!-- Record View Navigation Tabs -->
+        <div class="tabs-container">
+          <button class="tab-btn active" data-tab="soapTab">
+            <span class="tab-icon">📋</span>
+            <span>SOAP Note มาตรฐาน</span>
+          </button>
+          <button class="tab-btn" data-tab="orthoExamTab">
+            <span class="tab-icon">🦴</span>
+            <span>การตรวจเฉพาะทางกระดูก (Physical Exam)</span>
+          </button>
+          <button class="tab-btn" data-tab="voiceAssistantTab">
+            <span class="tab-icon">🔊</span>
+            <span>อ่านคำแนะนำผู้ป่วย (Text-to-Voice)</span>
+          </button>
+          <button class="tab-btn" data-tab="exportTab">
+            <span class="tab-icon">📤</span>
+            <span>ส่งออก / EMR Format</span>
+          </button>
+        </div>
+
+        <!-- TAB 1: SOAP Note Standard -->
+        <div class="tab-content active" id="soapTab">
+          <div class="soap-grid">
+            
+            <!-- S: Subjective -->
+            <div class="soap-card soap-s">
+              <div class="soap-card-header">
+                <div class="soap-label">S - Subjective (ประวัติอาการ)</div>
+                <span class="badge-count" id="badgeCC">0 รายการ</span>
+              </div>
+              <div class="soap-body">
+                <div class="form-group">
+                  <label class="field-label">อาการสำคัญ (Chief Complaint - CC):</label>
+                  <textarea id="fieldCC" class="soap-textarea" rows="2" placeholder="เช่น ปวดเข่าขวาลงน้ำหนักไม่ได้มา 2 สัปดาห์"></textarea>
+                </div>
+                <div class="form-group">
+                  <label class="field-label">ประวัติปัจจุบัน (Present Illness - PI):</label>
+                  <textarea id="fieldPI" class="soap-textarea" rows="3" placeholder="กลไกการบาดเจ็บ, ระดับความปวด, ท่าทางที่ทำให้อาการแย่ลงหรือดีขึ้น, เสียงลั่น/สะดุด"></textarea>
+                </div>
+                <div class="form-group">
+                  <label class="field-label">ประวัติเดิม & ยาเดิม (Past History / Meds):</label>
+                  <input type="text" id="fieldPMH" class="soap-input" placeholder="โรคประจำตัว, ประวัติการผ่าตัด, การแพ้ยา" />
+                </div>
+              </div>
+            </div>
+
+            <!-- O: Objective -->
+            <div class="soap-card soap-o">
+              <div class="soap-card-header">
+                <div class="soap-label">O - Objective (การตรวจร่างกาย & ผลตรวจ)</div>
+                <span class="badge-count" id="badgePE">0 ตรวจพบ</span>
+              </div>
+              <div class="soap-body">
+                <div class="form-group">
+                  <label class="field-label">การตรวจร่างกายกระดูกและข้อ (Orthopedic PE):</label>
+                  <textarea id="fieldPE" class="soap-textarea" rows="4" placeholder="Inspection, Palpation, Range of motion, Special test results, Neurovascular exam"></textarea>
+                </div>
+                <div class="form-group">
+                  <label class="field-label">ผลภาพถ่ายรังสี / ภาพสแกน (Imaging & Investigations):</label>
+                  <input type="text" id="fieldImaging" class="soap-input" placeholder="ผล X-ray, MRI, Ultrasound, ผลแล็บ" />
+                </div>
+              </div>
+            </div>
+
+            <!-- A: Assessment -->
+            <div class="soap-card soap-a">
+              <div class="soap-card-header">
+                <div class="soap-label">A - Assessment (การวินิจฉัย)</div>
+                <span class="badge-count" id="badgeDx">0 โรค</span>
+              </div>
+              <div class="soap-body">
+                <div class="form-group">
+                  <label class="field-label">การวินิจฉัยโรค (Provisional / Final Diagnosis):</label>
+                  <input type="text" id="fieldDx" class="soap-input input-bold" placeholder="เช่น Osteoarthritis of Right Knee (Grade 3), Lumbar HNP L4-L5" />
+                </div>
+                <div class="form-group">
+                  <label class="field-label">การวินิจฉัยแยกโรค (Differential Diagnosis - DDx):</label>
+                  <input type="text" id="fieldDDx" class="soap-input" placeholder="ข้อพิจารณาโรคอื่นๆ ที่ต้องเฝ้าระวัง" />
+                </div>
+              </div>
+            </div>
+
+            <!-- P: Plan -->
+            <div class="soap-card soap-p">
+              <div class="soap-card-header">
+                <div class="soap-label">P - Plan (แผนการรักษา & คำแนะนำ)</div>
+                <span class="badge-count" id="badgePlan">0 คำสั่ง</span>
+              </div>
+              <div class="soap-body">
+                <div class="form-group">
+                  <label class="field-label">การรักษาด้วยยาและหัตถการ (Treatment & Medication):</label>
+                  <textarea id="fieldTreatment" class="soap-textarea" rows="2" placeholder="ยาแก้ปวดลดการอักเสบ, การฉีดยาเข้าข้อ, กายภาพบำบัด, นัดผ่าตัด"></textarea>
+                </div>
+                <div class="form-row">
+                  <div class="form-group col-half">
+                    <label class="field-label">คำแนะนำผู้ป่วย (Patient Advice):</label>
+                    <input type="text" id="fieldAdvice" class="soap-input" placeholder="การพักข้อ, การประคบ, ท่าบริหาร" />
+                  </div>
+                  <div class="form-group col-half">
+                    <label class="field-label">การนัดติดตามอาการ (Follow Up):</label>
+                    <input type="text" id="fieldFollowUp" class="soap-input" placeholder="เช่น นัด 2 สัปดาห์ หรือ 1 เดือน" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- TAB 2: Orthopedic Focused Exam Grid -->
+        <div class="tab-content" id="orthoExamTab">
+          <div class="ortho-exam-container">
+            <div class="section-intro">
+              <h4>🦴 ระบบแยกหมวดหมู่การตรวจร่างกายเฉพาะทางออร์โธปิดิกส์ (Systematic Orthopedic Physical Exam)</h4>
+              <p>ระบบแยกการตรวจร่างกายออกเป็น 5 มิติสำคัญตามมาตรฐานสากล</p>
+            </div>
+
+            <div class="exam-categories-grid">
+              
+              <!-- 1. Inspection & Gait -->
+              <div class="exam-category-card">
+                <div class="exam-cat-header">
+                  <span class="cat-icon">👁️</span>
+                  <h5>1. การดู & การเดิน (Inspection & Gait)</h5>
+                </div>
+                <div class="exam-cat-body" id="examInspectionContent">
+                  <div class="exam-item empty-hint">ยังไม่พบข้อมูลการดูหรือการเดิน</div>
+                </div>
+              </div>
+
+              <!-- 2. Palpation & Tenderness -->
+              <div class="exam-category-card">
+                <div class="exam-cat-header">
+                  <span class="cat-icon">🖐️</span>
+                  <h5>2. การคลำจุดกดเจ็บ (Palpation & Tenderness)</h5>
+                </div>
+                <div class="exam-cat-body" id="examPalpationContent">
+                  <div class="exam-item empty-hint">ยังไม่พบข้อมูลจุดกดเจ็บ</div>
+                </div>
+              </div>
+
+              <!-- 3. Range of Motion (ROM) -->
+              <div class="exam-category-card">
+                <div class="exam-cat-header">
+                  <span class="cat-icon">🔄</span>
+                  <h5>3. การเคลื่อนไหวข้อ (Range of Motion - ROM)</h5>
+                </div>
+                <div class="exam-cat-body" id="examROMContent">
+                  <div class="exam-item empty-hint">ยังไม่พบข้อมูลมุมองศาการเคลื่อนไหว</div>
+                </div>
+              </div>
+
+              <!-- 4. Special Orthopedic Tests -->
+              <div class="exam-category-card highlight-card">
+                <div class="exam-cat-header">
+                  <span class="cat-icon">🎯</span>
+                  <h5>4. การตรวจทดสอบพิเศษ (Special Tests)</h5>
+                </div>
+                <div class="exam-cat-body" id="examSpecialTestsContent">
+                  <div class="exam-item empty-hint">เช่น Lachman, McMurray, Spurling, SLR, Neer's test</div>
+                </div>
+              </div>
+
+              <!-- 5. Neurovascular Exam -->
+              <div class="exam-category-card">
+                <div class="exam-cat-header">
+                  <span class="cat-icon">⚡</span>
+                  <h5>5. ระบบประสาทและหลอดเลือด (Neurovascular)</h5>
+                </div>
+                <div class="exam-cat-body" id="examNeuroContent">
+                  <div class="exam-item empty-hint">Motor power, Sensation dermatome, Pulses</div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: Text-to-Voice (Speech Synthesis & Patient Voice Assistant) -->
+        <div class="tab-content" id="voiceAssistantTab">
+          <div class="voice-assistant-card">
+            
+            <!-- Hero banner for TTS -->
+            <div class="tts-hero">
+              <div class="tts-hero-icon">
+                <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                </svg>
+              </div>
+              <div class="tts-hero-text">
+                <h3>ระบบสังเคราะห์เสียงอัจฉริยะ (Text-to-Voice)</h3>
+                <p>อ่านสรุปข้อวินิจฉัยทางการแพทย์ และอ่านคำแนะนำการปฏิบัติตัวสำหรับผู้ป่วยกลับบ้านด้วยเสียงพูดภาษาไทยที่นุ่มนวล เข้าใจง่าย</p>
+              </div>
+            </div>
+
+            <!-- Voice Synthesizer Controls -->
+            <div class="tts-controls-bar">
+              <div class="tts-voice-select-group">
+                <label for="ttsVoiceSelect">เสียงอ่าน:</label>
+                <select id="ttsVoiceSelect" class="tts-select"></select>
+              </div>
+              <div class="tts-rate-group">
+                <label for="ttsRateRange">ความเร็ว: <span id="ttsRateValue">1.0x</span></label>
+                <input type="range" id="ttsRateRange" min="0.7" max="1.4" step="0.1" value="1.0">
+              </div>
+            </div>
+
+            <!-- Script / Text Options to Read -->
+            <div class="tts-presets-buttons">
+              <button class="btn btn-secondary btn-sm active" id="btnPresetPatientSummary">
+                🗣️ สรุปคำแนะนำสำหรับผู้ป่วย (Patient Instructions)
+              </button>
+              <button class="btn btn-secondary btn-sm" id="btnPresetDoctorSummary">
+                👨‍⚕️ สรุปเคสสำหรับแพทย์ (Clinical Summary)
+              </button>
+              <button class="btn btn-secondary btn-sm" id="btnPresetDischargeWarning">
+                ⚠️ สัญญาณเตือนที่ต้องมาพบแพทย์ด่วน (Red Flags)
+              </button>
+            </div>
+
+            <!-- Text Box to be read aloud (editable) -->
+            <div class="tts-textarea-wrapper">
+              <div class="tts-text-header">
+                <span>ข้อความที่จะอ่านออกเสียง (สามารถพิมพ์ปรับแต่งคำพูดได้อิสระ):</span>
+                <button id="btnRegenerateSpeechScript" class="btn-text-action" title="สร้างสคริปต์คำพูดใหม่อัตโนมัติจากผลตรวจ">🔄 สร้างสคริปต์ใหม่</button>
+              </div>
+              <textarea id="ttsSpeechText" class="tts-textarea" rows="6" placeholder="กด 'แยกข้อมูลการตรวจ (AI Parse)' เพื่อสร้างคำแนะนำผู้ป่วย หรือพิมพ์ข้อความที่ต้องการให้อ่านออกเสียงที่นี่..."></textarea>
+            </div>
+
+            <!-- Audio Player Bar -->
+            <div class="tts-player-card">
+              <div class="tts-playback-buttons">
+                <button id="btnTtsPlay" class="btn btn-primary btn-play">
+                  <svg id="ttsPlayIcon" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="currentColor">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                  </svg>
+                  <span id="ttsPlayBtnText">อ่านออกเสียง (Play Voice)</span>
+                </button>
+                <button id="btnTtsPause" class="btn btn-secondary btn-icon" title="หยุดชั่วคราว" disabled>
+                  <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
+                    <rect x="6" y="4" width="4" height="16"></rect>
+                    <rect x="14" y="4" width="4" height="16"></rect>
+                  </svg>
+                </button>
+                <button id="btnTtsStop" class="btn btn-secondary btn-icon" title="หยุดและย้อนกลับต้นเรื่อง" disabled>
+                  <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="currentColor">
+                    <rect x="4" y="4" width="16" height="16"></rect>
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Animated Voice Wave Bars for TTS -->
+              <div class="tts-anim-bars" id="ttsWaveBars">
+                <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+                <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+                <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+                <span class="bar"></span>
+              </div>
+
+              <div class="tts-status-text" id="ttsStatusText">พร้อมอ่านออกเสียง</div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- TAB 4: Export & EMR Integration -->
+        <div class="tab-content" id="exportTab">
+          <div class="export-container">
+            <div class="export-header-row">
+              <h4>📤 การส่งออกเวชระเบียน (EMR / Hospital System Export)</h4>
+              <div class="export-actions">
+                <button id="btnCopyEmrText" class="btn btn-primary btn-sm">
+                  <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  คัดลอกลงคลิปบอร์ด (Copy for EMR)
+                </button>
+                <button id="btnPrintOpdCard" class="btn btn-secondary btn-sm">
+                  <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                  พิมพ์ใบตรวจ OPD Card
+                </button>
+                <button id="btnDownloadJson" class="btn btn-ghost btn-sm">
+                  <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                  ดาวน์โหลด JSON
+                </button>
+              </div>
+            </div>
+
+            <!-- EMR Format Preview Box -->
+            <div class="emr-preview-box">
+              <pre id="emrPreviewText" class="emr-code-block"></pre>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- Footer Quick Status -->
+    <footer class="app-footer">
+      <div class="footer-left">
+        <span>🏥 คลินิกศัลยกรรมกระดูกและข้อ (Department of Orthopedics)</span>
+        <span class="sep">•</span>
+        <span id="wordCountLabel">0 คำสนทนา</span>
+        <span class="sep">•</span>
+        <span id="entityCountLabel">0 ศัพท์การแพทย์</span>
+      </div>
+      <div class="footer-right">
+        <span>รองรับ Web Speech API & Text-to-Speech ภาษาไทย-อังกฤษ</span>
+        <span class="badge-tag">v1.0 Ready</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Settings / API Configuration Modal -->
+  <dialog id="configDialog" class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>⚙️ ตั้งค่าระบบประมวลผล AI & Voice</h3>
+        <button id="btnCloseConfig" class="btn-close" aria-label="ปิด">&times;</button>
+      </div>
+      <div class="modal-body">
+        
+        <div class="config-group">
+          <label class="config-label" for="apiKeyInput">Google Gemini API Key (ตัวเลือกเสริมสำหรับ AI เชิงลึก):</label>
+          <input type="password" id="apiKeyInput" class="soap-input" placeholder="AIzaSy... (หากเว้นว่าง ระบบจะใช้ Ortho Heuristic Engine ในตัว)" />
+          <p class="config-help">
+            หากไม่มี API Key ระบบมี <strong>Local Orthopedic Rule-based Parser</strong> ในตัวที่จำแนกและสกัดประวัติ การตรวจร่างกาย และการวินิจฉัยได้อย่างสมบูรณ์แบบโดยไม่ต้องใช้อินเทอร์เน็ต
+          </p>
+        </div>
+
+        <div class="config-group">
+          <label class="config-label" for="modelSelect">โมเดล AI ที่เลือกใช้:</label>
+          <select id="modelSelect" class="scenario-select">
+            <option value="gemini-1.5-flash">Gemini 1.5 Flash (เร็วที่สุด แนะนำสำหรับเรียลไทม์)</option>
+            <option value="gemini-1.5-pro">Gemini 1.5 Pro (วิเคราะห์เคสซับซ้อนแม่นยำสูง)</option>
+            <option value="local-heuristic" selected>Local Built-in Ortho Engine (เร็ว 0ms ไม่ต้องต่อเน็ต)</option>
+          </select>
+        </div>
+
+        <div class="config-group">
+          <label class="config-label">การสลับผู้พูดอัตโนมัติ (Speaker Heuristic):</label>
+          <div class="checkbox-wrapper">
+            <input type="checkbox" id="chkAutoSpeaker" checked>
+            <label for="chkAutoSpeaker">ตรวจจับและแยกบทสนทนาแพทย์ vs ผู้ป่วยอัตโนมัติจากคำขึ้นต้นและลักษณะคำถาม-คำตอบ</label>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button id="btnSaveConfig" class="btn btn-primary">บันทึกการตั้งค่า</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Notification Toast Container -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <!-- Application Scripts -->
+  <script src="js/ortho_knowledge.js"></script>
+  <script src="js/scenarios.js"></script>
+  <script src="js/parser.js"></script>
+  <script src="js/gemini_service.js"></script>
+  <script src="js/speech_stt.js"></script>
+  <script src="js/voice_tts.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
