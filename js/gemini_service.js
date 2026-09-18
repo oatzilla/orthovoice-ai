@@ -7,7 +7,9 @@
 class GeminiService {
   constructor() {
     this.apiKey = localStorage.getItem('ortho_gemini_api_key') || '';
-    this.model = localStorage.getItem('ortho_gemini_model') || 'local-heuristic';
+    this.model = localStorage.getItem('ortho_gemini_model') || 'auto-smart';
+    this.lastRoutedModel = null;
+    this.lastRouteReason = '';
   }
 
   setApiKey(key) {
@@ -33,17 +35,56 @@ class GeminiService {
   }
 
   /**
+   * Automatically resolve optimal AI model based on clinical complexity and red flags
+   */
+  resolveModel(conversationText) {
+    if (this.model !== 'auto-smart') {
+      return {
+        model: this.model,
+        reason: `กำหนดโดยผู้ใช้ (${this.model})`
+      };
+    }
+
+    // High complexity triggers: Red flags, Neurological deficits, Prior surgeries, Multiple trauma
+    const isHighComplexity = 
+      conversationText.length > 850 ||
+      /(?:cauda\s*equina|กลั้นไม่อยู่|ชาหว่างขา|saddle|มะเร็ง|metastasis|ติดเชื้อ|septic|osteomyelitis|เคยผ่าตัด|ใส่เหล็ก|revision|polyarticular|อุบัติเหตุรุนแรง|foot\s*drop|motor\s*grade\s*[123])/i.test(conversationText);
+
+    if (isHighComplexity) {
+      return {
+        model: 'gemini-1.5-pro',
+        reason: '⚡ AI Router: ตรวจพบความซับซ้อนสูง/สัญญาณเตือน จึงสลับไปใช้ Gemini 1.5 Pro อัตโนมัติ'
+      };
+    }
+
+    return {
+      model: 'gemini-1.5-flash',
+      reason: '⚡ AI Router: เคสทั่วไป ใช้ Gemini 1.5 Flash เพื่อความรวดเร็วและประหยัด'
+    };
+  }
+
+  /**
    * Process dialogue text using Gemini API if configured, otherwise fallback to local parser
    */
   async extractOrthoRecord(dialogueTurns, localParser) {
     // If local heuristic is selected or no API key, use local parser
     if (this.model === 'local-heuristic' || !this.hasApiKey()) {
-      return localParser.parseClinicalDialogue(dialogueTurns);
+      const parsed = localParser.parseClinicalDialogue(dialogueTurns);
+      parsed.routedModel = 'local-heuristic';
+      parsed.routeReason = 'Local Built-in Ortho Engine (ออฟไลน์)';
+      return parsed;
     }
 
     const conversationText = Array.isArray(dialogueTurns)
       ? dialogueTurns.map(t => `${t.speaker}: ${t.text}`).join('\n')
       : dialogueTurns;
+
+    // Resolve Active Model dynamically
+    const routing = this.resolveModel(conversationText);
+    const activeModel = routing.model;
+    this.lastRoutedModel = activeModel;
+    this.lastRouteReason = routing.reason;
+    console.log(`[OrthoVoice Smart Router] Model: ${activeModel} | Reason: ${routing.reason}`);
 
     const prompt = `
 You are an expert Orthopedic Surgeon and Medical Scribe AI.
@@ -79,7 +120,7 @@ ${conversationText}
 `;
 
     try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.apiKey}`, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${activeModel}:generateContent?key=${this.apiKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -101,15 +142,18 @@ ${conversationText}
       const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
       if (content) {
         const parsedJson = JSON.parse(content);
-        // Also extract local entity tags to keep UI rich
         parsedJson.entities = localParser.extractEntities(conversationText);
+        parsedJson.routedModel = activeModel;
+        parsedJson.routeReason = routing.reason;
         return parsedJson;
       }
       throw new Error('Empty response from Gemini model');
     } catch (error) {
       console.warn('Gemini API call failed, falling back to local heuristic engine:', error);
-      // Fallback
-      return localParser.parseClinicalDialogue(dialogueTurns);
+      const parsed = localParser.parseClinicalDialogue(dialogueTurns);
+      parsed.routedModel = 'local-heuristic';
+      parsed.routeReason = 'Local Engine (Fallback หลังจากต่อ API ไม่สำเร็จ)';
+      return parsed;
     }
   }
 }

@@ -521,7 +521,11 @@ document.addEventListener('DOMContentLoaded', () => {
       updateEmrPreview();
 
       updateRecordingStatus('ready', 'วิเคราะห์เสร็จสมบูรณ์ (Parsed)');
-      showToast('AI แยกข้อมูลประวัติและการตรวจร่างกายเรียบร้อยแล้ว', 'success');
+      if (result.routeReason) {
+        showToast(result.routeReason, 'success');
+      } else {
+        showToast('AI แยกข้อมูลประวัติและการตรวจร่างกายเรียบร้อยแล้ว', 'success');
+      }
     } catch (err) {
       console.error('Error during parsing:', err);
       updateRecordingStatus('ready', 'พร้อมรับฟัง (Ready)');
