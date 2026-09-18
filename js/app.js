@@ -32,6 +32,45 @@ document.addEventListener('DOMContentLoaded', () => {
     apiKeyInput: document.getElementById('apiKeyInput'),
     modelSelect: document.getElementById('modelSelect'),
     chkAutoSpeaker: document.getElementById('chkAutoSpeaker'),
+    sheetWebAppUrlInput: document.getElementById('sheetWebAppUrlInput'),
+    btnCopyAppsScript: document.getElementById('btnCopyAppsScript'),
+    btnTestSheetSync: document.getElementById('btnTestSheetSync'),
+
+    // Top Action Buttons
+    btnSaveCase: document.getElementById('btnSaveCase'),
+    btnSaveCaseText: document.getElementById('btnSaveCaseText'),
+    btnOpenSavedCases: document.getElementById('btnOpenSavedCases'),
+    savedCasesCountBadge: document.getElementById('savedCasesCountBadge'),
+    btnPrintReport: document.getElementById('btnPrintReport'),
+    btnNewCase: document.getElementById('btnNewCase'),
+
+    // Patient Demographics
+    patientInfoBar: document.getElementById('patientInfoBar'),
+    patientName: document.getElementById('patientName'),
+    patientHn: document.getElementById('patientHn'),
+    patientAge: document.getElementById('patientAge'),
+    patientGender: document.getElementById('patientGender'),
+    patientDate: document.getElementById('patientDate'),
+    patientDoctor: document.getElementById('patientDoctor'),
+    patientCoverage: document.getElementById('patientCoverage'),
+    activeCaseTag: document.getElementById('activeCaseTag'),
+    btnQuickDemoPatient: document.getElementById('btnQuickDemoPatient'),
+
+    // Saved Cases Modal
+    savedCasesModal: document.getElementById('savedCasesModal'),
+    btnCloseSavedCases: document.getElementById('btnCloseSavedCases'),
+    btnCloseSavedCasesFooter: document.getElementById('btnCloseSavedCasesFooter'),
+    inputSearchCases: document.getElementById('inputSearchCases'),
+    btnSyncCasesNow: document.getElementById('btnSyncCasesNow'),
+    savedCasesContainer: document.getElementById('savedCasesContainer'),
+    savedCasesCountLabel: document.getElementById('savedCasesCountLabel'),
+
+    // Print Report Modal
+    printReportModal: document.getElementById('printReportModal'),
+    btnPrintModalConfirm: document.getElementById('btnPrintModalConfirm'),
+    btnBackToEditFromPrint: document.getElementById('btnBackToEditFromPrint'),
+    btnClosePrintReport: document.getElementById('btnClosePrintReport'),
+    printPaperSheet: document.getElementById('printPaperSheet'),
 
     // Audio & Speech Controls
     btnToggleRecord: document.getElementById('btnToggleRecord'),
@@ -197,8 +236,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Set Default Date to Today
+  if (elems.patientDate && !elems.patientDate.value) {
+    elems.patientDate.valueAsDate = new Date();
+  }
+
+  // Load Saved Google Sheets Config
+  if (elems.sheetWebAppUrlInput && window.OrthoSheetsDB) {
+    elems.sheetWebAppUrlInput.value = window.OrthoSheetsDB.webAppUrl || '';
+  }
+  updateSavedCasesBadge();
+
   // Config Dialog
   elems.btnOpenConfig.addEventListener('click', () => {
+    if (elems.sheetWebAppUrlInput && window.OrthoSheetsDB) {
+      elems.sheetWebAppUrlInput.value = window.OrthoSheetsDB.webAppUrl || '';
+    }
     elems.configDialog.showModal();
   });
 
@@ -209,9 +262,152 @@ document.addEventListener('DOMContentLoaded', () => {
   elems.btnSaveConfig.addEventListener('click', () => {
     geminiService.setApiKey(elems.apiKeyInput.value);
     geminiService.setModel(elems.modelSelect.value);
+
+    // Save Google Sheets Config
+    if (elems.sheetWebAppUrlInput && window.OrthoSheetsDB) {
+      window.OrthoSheetsDB.saveConfig({
+        webAppUrl: elems.sheetWebAppUrlInput.value.trim()
+      });
+    }
+
     elems.configDialog.close();
     showToast('บันทึกการตั้งค่าระบบเรียบร้อยแล้ว', 'success');
   });
+
+  // Copy Google Apps Script Template
+  if (elems.btnCopyAppsScript) {
+    elems.btnCopyAppsScript.addEventListener('click', () => {
+      if (window.OrthoSheetsDB) {
+        const code = window.OrthoSheetsDB.getAppsScriptTemplate();
+        navigator.clipboard.writeText(code).then(() => {
+          showToast('คัดลอกโค้ด Google Apps Script เรียบร้อยแล้ว นำไปวางในชีตได้เลย', 'success');
+        });
+      }
+    });
+  }
+
+  // Test Google Sheet Sync
+  if (elems.btnTestSheetSync) {
+    elems.btnTestSheetSync.addEventListener('click', async () => {
+      const url = elems.sheetWebAppUrlInput ? elems.sheetWebAppUrlInput.value.trim() : '';
+      if (!url) {
+        showToast('กรุณากรอก Google Apps Script Web App URL ก่อนทดสอบ', 'error');
+        return;
+      }
+      showToast('กำลังทดสอบการเชื่อมต่อ Google Sheets...', 'info');
+      try {
+        const res = await fetch(`${url}?t=${Date.now()}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.status === 'success') {
+            showToast(`เชื่อมต่อ Google Sheets สำเร็จ! พบข้อมูล ${data.records ? data.records.length : 0} รายการ`, 'success');
+          } else {
+            showToast(`การเชื่อมต่อตอบกลับ: ${data.message || 'Error'}`, 'error');
+          }
+        } else {
+          showToast(`เชื่อมต่อไม่สำเร็จ HTTP ${res.status}`, 'error');
+        }
+      } catch (err) {
+        showToast(`เชื่อมต่อไม่สำเร็จ: ตรวจสอบ URL หรือสิทธิ์เข้าถึง (ต้องเลือก Anyone)`, 'error');
+      }
+    });
+  }
+
+  // Quick Demo Patient Button
+  if (elems.btnQuickDemoPatient) {
+    elems.btnQuickDemoPatient.addEventListener('click', () => {
+      elems.patientName.value = 'นายสมศักดิ์ วงศ์สวัสดิ์';
+      elems.patientHn.value = '67-004291';
+      elems.patientAge.value = '58 ปี';
+      elems.patientGender.value = 'ชาย';
+      elems.patientCoverage.value = 'บัตรทอง (UC) / รพ.ตามสิทธิ';
+      elems.patientDoctor.value = 'นพ. กฤษดา (ศัลยแพทย์ออร์โธปิดิกส์)';
+      showToast('กรอกข้อมูลผู้ป่วยตัวอย่างเรียบร้อย', 'info');
+    });
+  }
+
+  // Save Case Button
+  if (elems.btnSaveCase) {
+    elems.btnSaveCase.addEventListener('click', async () => {
+      await saveCurrentCase();
+    });
+  }
+
+  // Open Saved Cases Archive Modal
+  if (elems.btnOpenSavedCases) {
+    elems.btnOpenSavedCases.addEventListener('click', async () => {
+      elems.savedCasesModal.showModal();
+      await renderSavedCasesList();
+    });
+  }
+
+  if (elems.btnCloseSavedCases) {
+    elems.btnCloseSavedCases.addEventListener('click', () => {
+      elems.savedCasesModal.close();
+    });
+  }
+
+  if (elems.btnCloseSavedCasesFooter) {
+    elems.btnCloseSavedCasesFooter.addEventListener('click', () => {
+      elems.savedCasesModal.close();
+    });
+  }
+
+  if (elems.inputSearchCases) {
+    elems.inputSearchCases.addEventListener('input', () => {
+      const q = elems.inputSearchCases.value.trim().toLowerCase();
+      renderSavedCasesList(q);
+    });
+  }
+
+  if (elems.btnSyncCasesNow) {
+    elems.btnSyncCasesNow.addEventListener('click', async () => {
+      showToast('กำลังซิงค์ข้อมูลจาก Google Sheet...', 'info');
+      await renderSavedCasesList();
+      showToast('ซิงค์ข้อมูลล่าสุดเรียบร้อยแล้ว', 'success');
+    });
+  }
+
+  // Print Report Buttons
+  if (elems.btnPrintReport) {
+    elems.btnPrintReport.addEventListener('click', () => {
+      openPrintReportModal();
+    });
+  }
+
+  if (elems.btnPrintOpdCard) {
+    elems.btnPrintOpdCard.addEventListener('click', () => {
+      openPrintReportModal();
+    });
+  }
+
+  if (elems.btnPrintModalConfirm) {
+    elems.btnPrintModalConfirm.addEventListener('click', () => {
+      window.print();
+    });
+  }
+
+  if (elems.btnBackToEditFromPrint) {
+    elems.btnBackToEditFromPrint.addEventListener('click', () => {
+      elems.printReportModal.close();
+      if (elems.fieldCC) elems.fieldCC.focus();
+    });
+  }
+
+  if (elems.btnClosePrintReport) {
+    elems.btnClosePrintReport.addEventListener('click', () => {
+      elems.printReportModal.close();
+    });
+  }
+
+  // New Case Button
+  if (elems.btnNewCase) {
+    elems.btnNewCase.addEventListener('click', () => {
+      if (confirm('คุณต้องการเริ่มตรวจคนไข้เคสใหม่หรือไม่? (ข้อมูลปัจจุบันที่ยังไม่ได้บันทึกจะถูกล้าง)')) {
+        startNewCase();
+      }
+    });
+  }
 
   // TTS Controls
   elems.btnTtsPlay.addEventListener('click', () => {
@@ -601,6 +797,384 @@ Recorded via OrthoVoice Ambient Scribe System (Confidential Medical Record)
     elems.emrPreviewText.textContent = emrText;
   }
 
+  // ==========================================================================
+  // Case Data Management (Google Sheets & LocalStorage)
+  // ==========================================================================
+
+  function collectCaseData() {
+    return {
+      caseId: state.currentCaseId || '',
+      timestamp: new Date().toISOString(),
+      hn: (elems.patientHn ? elems.patientHn.value.trim() : ''),
+      patientName: (elems.patientName ? elems.patientName.value.trim() : ''),
+      age: (elems.patientAge ? elems.patientAge.value.trim() : ''),
+      gender: (elems.patientGender ? elems.patientGender.value : ''),
+      visitDate: (elems.patientDate ? elems.patientDate.value : new Date().toISOString().slice(0, 10)),
+      doctor: (elems.patientDoctor ? elems.patientDoctor.value.trim() : ''),
+      coverage: (elems.patientCoverage ? elems.patientCoverage.value.trim() : ''),
+      chiefComplaint: (elems.fieldCC ? elems.fieldCC.value.trim() : ''),
+      presentIllness: (elems.fieldPI ? elems.fieldPI.value.trim() : ''),
+      pastHistory: (elems.fieldPMH ? elems.fieldPMH.value.trim() : ''),
+      physicalExam: (elems.fieldPE ? elems.fieldPE.value.trim() : ''),
+      imagingLabs: (elems.fieldImaging ? elems.fieldImaging.value.trim() : ''),
+      primaryDiagnosis: (elems.fieldDx ? elems.fieldDx.value.trim() : ''),
+      differentialDx: (elems.fieldDDx ? elems.fieldDDx.value.trim() : ''),
+      treatmentPlan: (elems.fieldTreatment ? elems.fieldTreatment.value.trim() : ''),
+      patientAdvice: (elems.fieldAdvice ? elems.fieldAdvice.value.trim() : ''),
+      followUp: (elems.fieldFollowUp ? elems.fieldFollowUp.value.trim() : ''),
+      systematicExam: state.parsedData && state.parsedData.systematicExam ? state.parsedData.systematicExam : {
+        inspection: [], palpation: [], rom: [], specialTests: [], neuro: []
+      },
+      rawDialogue: state.dialogueTurns || [],
+      ttsText: (elems.ttsSpeechText ? elems.ttsSpeechText.value : '')
+    };
+  }
+
+  function populateCaseData(record) {
+    if (!record) return;
+
+    state.currentCaseId = record.caseId || null;
+
+    if (elems.patientName) elems.patientName.value = record.patientName || '';
+    if (elems.patientHn) elems.patientHn.value = record.hn || '';
+    if (elems.patientAge) elems.patientAge.value = record.age || '';
+    if (elems.patientGender) elems.patientGender.value = record.gender || '';
+    if (elems.patientDate && record.visitDate) elems.patientDate.value = record.visitDate;
+    if (elems.patientDoctor && record.doctor) elems.patientDoctor.value = record.doctor;
+    if (elems.patientCoverage && record.coverage) elems.patientCoverage.value = record.coverage;
+
+    populateSoapFields({
+      cc: record.chiefComplaint || '',
+      pi: record.presentIllness || '',
+      pmh: record.pastHistory || '',
+      pe: record.physicalExam || '',
+      imaging: record.imagingLabs || '',
+      dx: record.primaryDiagnosis || '',
+      ddx: record.differentialDx || '',
+      treatment: record.treatmentPlan || '',
+      advice: record.patientAdvice || '',
+      followUp: record.followUp || ''
+    });
+
+    if (record.systematicExam) {
+      try {
+        const examData = typeof record.systematicExam === 'string' ? JSON.parse(record.systematicExam) : record.systematicExam;
+        populateSystematicExam(examData);
+      } catch (e) {
+        console.warn('Could not parse systematicExam json', e);
+      }
+    }
+
+    if (record.rawDialogue && Array.isArray(record.rawDialogue) && record.rawDialogue.length > 0) {
+      state.dialogueTurns = record.rawDialogue;
+      renderTranscriptStream();
+    }
+
+    if (elems.ttsSpeechText && record.ttsText) {
+      elems.ttsSpeechText.value = record.ttsText;
+    }
+
+    // Update active case indicator tag
+    if (elems.activeCaseTag) {
+      elems.activeCaseTag.textContent = `กำลังแก้ไข: ${record.caseId}`;
+      elems.activeCaseTag.classList.add('is-saved');
+    }
+  }
+
+  async function saveCurrentCase() {
+    const record = collectCaseData();
+
+    // Warn if no patient name or CC or DX
+    if (!record.patientName && !record.chiefComplaint && !record.primaryDiagnosis) {
+      showToast('กรุณากรอกชื่อผู้ป่วย หรือ อาการสำคัญ หรือ การวินิจฉัยก่อนบันทึก', 'error');
+      if (elems.patientName) elems.patientName.focus();
+      return;
+    }
+
+    if (elems.btnSaveCaseText) elems.btnSaveCaseText.textContent = 'กำลังบันทึก...';
+    if (elems.btnSaveCase) elems.btnSaveCase.disabled = true;
+
+    try {
+      const res = await window.OrthoSheetsDB.saveCase(record);
+      state.currentCaseId = res.caseId;
+
+      if (elems.activeCaseTag) {
+        elems.activeCaseTag.textContent = `บันทึกแล้ว: ${res.caseId}`;
+        elems.activeCaseTag.classList.add('is-saved');
+      }
+
+      updateSavedCasesBadge();
+
+      if (res.cloudSynced) {
+        showToast(`✅ บันทึกเคส ${res.caseId} สำเร็จและซิงค์ขึ้น Google Sheet แล้ว`, 'success');
+      } else {
+        showToast(`💾 บันทึกเคส ${res.caseId} ในเครื่องเรียบร้อยแล้ว`, 'success');
+      }
+    } catch (err) {
+      console.error('Error saving case:', err);
+      showToast('เกิดข้อผิดพลาดในการบันทึกเคส', 'error');
+    } finally {
+      if (elems.btnSaveCaseText) elems.btnSaveCaseText.textContent = 'บันทึกเคส (Save)';
+      if (elems.btnSaveCase) elems.btnSaveCase.disabled = false;
+    }
+  }
+
+  async function renderSavedCasesList(filterText = '') {
+    if (!elems.savedCasesContainer) return;
+    elems.savedCasesContainer.innerHTML = '<div style="padding: 24px; text-align: center; color: var(--text-secondary);">กำลังโหลดข้อมูลเวชระเบียน...</div>';
+
+    const cases = await window.OrthoSheetsDB.fetchAllCases();
+    updateSavedCasesBadge(cases.length);
+
+    let filtered = cases;
+    if (filterText) {
+      const q = filterText.toLowerCase();
+      filtered = cases.filter(c => 
+        (c.patientName && c.patientName.toLowerCase().includes(q)) ||
+        (c.hn && c.hn.toLowerCase().includes(q)) ||
+        (c.primaryDiagnosis && c.primaryDiagnosis.toLowerCase().includes(q)) ||
+        (c.chiefComplaint && c.chiefComplaint.toLowerCase().includes(q))
+      );
+    }
+
+    if (elems.savedCasesCountLabel) {
+      elems.savedCasesCountLabel.textContent = `แสดง ${filtered.length} จากทั้งหมด ${cases.length} เคส`;
+    }
+
+    if (filtered.length === 0) {
+      elems.savedCasesContainer.innerHTML = `
+        <div class="empty-state" style="padding: 40px 20px;">
+          <div class="empty-icon">📂</div>
+          <h4>${cases.length === 0 ? 'ยังไม่มีประวัติเคสที่บันทึกไว้' : 'ไม่พบเคสที่ตรงกับคำค้นหา'}</h4>
+          <p>${cases.length === 0 ? 'เมื่อตรวจรักษาผู้ป่วยเสร็จแล้ว ให้กดปุ่ม "💾 บันทึกเคส" เพื่อจัดเก็บข้อมูลลง Google Sheet' : 'ลองค้นหาด้วยชื่ออื่น หรือ HN อื่น'}</p>
+        </div>
+      `;
+      return;
+    }
+
+    elems.savedCasesContainer.innerHTML = '';
+    filtered.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'saved-case-item';
+
+      const dateDisplay = item.visitDate || (item.timestamp ? new Date(item.timestamp).toLocaleDateString('th-TH') : '-');
+      const nameDisplay = item.patientName || 'ไม่ระบุชื่อผู้ป่วย';
+      const hnDisplay = item.hn ? `HN: ${item.hn}` : 'ไม่มี HN';
+      const dxDisplay = item.primaryDiagnosis || 'ยังไม่ระบุการวินิจฉัย';
+      const ccDisplay = item.chiefComplaint ? `CC: ${item.chiefComplaint}` : 'ไม่มีอาการสำคัญ';
+
+      row.innerHTML = `
+        <div class="case-info-main">
+          <div class="case-header-row">
+            <span class="case-patient-name">${escapeHtml(nameDisplay)}</span>
+            <span class="case-hn-badge">${escapeHtml(hnDisplay)}</span>
+            <span class="case-date-text">📅 ${dateDisplay}</span>
+            <span style="font-size: 0.72rem; color: #94a3b8; font-family: var(--font-mono);">${escapeHtml(item.caseId)}</span>
+          </div>
+          <div class="case-dx-title">🩺 ${escapeHtml(dxDisplay)}</div>
+          <div class="case-cc-snippet">${escapeHtml(ccDisplay)}</div>
+        </div>
+        <div class="case-actions-group">
+          <button class="btn btn-primary btn-sm btn-edit-case" title="โหลดข้อมูลกลับมาแก้ไขในฟอร์ม">
+            ✏️ เปิดแก้ไข
+          </button>
+          <button class="btn btn-secondary btn-sm btn-print-case" title="พิมพ์รายงานการตรวจเคสนี้">
+            🖨️ พิมพ์
+          </button>
+          <button class="btn btn-ghost btn-sm btn-delete-case" title="ลบเคสนี้" style="color: var(--color-danger);">
+            🗑️
+          </button>
+        </div>
+      `;
+
+      // Button handlers
+      row.querySelector('.btn-edit-case').addEventListener('click', () => {
+        loadCaseForEditing(item.caseId);
+      });
+
+      row.querySelector('.btn-print-case').addEventListener('click', () => {
+        elems.savedCasesModal.close();
+        openPrintReportModal(item);
+      });
+
+      row.querySelector('.btn-delete-case').addEventListener('click', async () => {
+        if (confirm(`คุณต้องการลบเคส "${nameDisplay}" (${item.caseId}) หรือไม่?`)) {
+          await window.OrthoSheetsDB.deleteCase(item.caseId);
+          showToast(`ลบเคส ${item.caseId} เรียบร้อยแล้ว`, 'info');
+          renderSavedCasesList(filterText);
+          updateSavedCasesBadge();
+        }
+      });
+
+      elems.savedCasesContainer.appendChild(row);
+    });
+  }
+
+  function loadCaseForEditing(caseId) {
+    const cases = window.OrthoSheetsDB.getLocalCases();
+    const item = cases.find(c => c.caseId === caseId);
+    if (!item) {
+      showToast('ไม่พบข้อมูลเคสที่เลือก', 'error');
+      return;
+    }
+
+    populateCaseData(item);
+    elems.savedCasesModal.close();
+
+    // Switch to first tab (SOAP note)
+    const firstTabBtn = document.querySelector('.tab-btn[data-tab="soapTab"]');
+    if (firstTabBtn) firstTabBtn.click();
+
+    showToast(`โหลดข้อมูลเคส "${item.patientName || item.caseId}" เพื่อแก้ไขเรียบร้อยแล้ว`, 'success');
+  }
+
+  function updateSavedCasesBadge(count = null) {
+    if (!elems.savedCasesCountBadge) return;
+    if (count === null) {
+      const cases = window.OrthoSheetsDB ? window.OrthoSheetsDB.getLocalCases() : [];
+      count = cases.length;
+    }
+    elems.savedCasesCountBadge.textContent = count;
+  }
+
+  // ==========================================================================
+  // Report Generator & Print Modal Handler
+  // ==========================================================================
+
+  function openPrintReportModal(record = null) {
+    if (!record) {
+      record = collectCaseData();
+    }
+
+    if (!elems.printPaperSheet) return;
+
+    const dateStr = record.visitDate || new Date().toLocaleDateString('th-TH');
+    const printDate = new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+    // Build 5-Dimension Exam Table if available
+    let examTableHtml = '';
+    const sys = record.systematicExam || {};
+    const inspection = Array.isArray(sys.inspection) && sys.inspection.length ? sys.inspection.join(', ') : '-';
+    const palpation = Array.isArray(sys.palpation) && sys.palpation.length ? sys.palpation.join(', ') : '-';
+    const rom = Array.isArray(sys.rom) && sys.rom.length ? sys.rom.join(', ') : '-';
+    const specialTests = Array.isArray(sys.specialTests) && sys.specialTests.length ? sys.specialTests.join(', ') : '-';
+    const neuro = Array.isArray(sys.neuro) && sys.neuro.length ? sys.neuro.join(', ') : '-';
+
+    if (inspection !== '-' || palpation !== '-' || rom !== '-' || specialTests !== '-' || neuro !== '-') {
+      examTableHtml = `
+        <table class="report-exam-table">
+          <tr><th>1. Inspection & Gait</th><td>${escapeHtml(inspection)}</td></tr>
+          <tr><th>2. Palpation / Tenderness</th><td>${escapeHtml(palpation)}</td></tr>
+          <tr><th>3. Range of Motion (ROM)</th><td>${escapeHtml(rom)}</td></tr>
+          <tr><th>4. Special Orthopedic Tests</th><td><strong>${escapeHtml(specialTests)}</strong></td></tr>
+          <tr><th>5. Neurovascular Status</th><td>${escapeHtml(neuro)}</td></tr>
+        </table>
+      `;
+    }
+
+    elems.printPaperSheet.innerHTML = `
+      <div class="report-header">
+        <div class="report-hospital-info">
+          <div class="h-logo">🏥</div>
+          <div>
+            <div class="report-hospital-title">คลินิกเฉพาะทางศัลยกรรมกระดูกและข้อ (Department of Orthopedics)</div>
+            <div class="report-hospital-sub">โรงพยาบาลออร์โธปิดิกส์อัจฉริยะ • OrthoVoice Clinical Documentation System</div>
+          </div>
+        </div>
+        <div class="report-doc-badge">
+          <div class="report-doc-title">OPD CLINICAL REPORT</div>
+          <div class="report-doc-id">Ref: ${escapeHtml(record.caseId || 'NEW-RECORD')}</div>
+        </div>
+      </div>
+
+      <div class="report-patient-box">
+        <div class="rp-item"><strong>ชื่อ-สกุล:</strong> ${escapeHtml(record.patientName || 'ไม่ระบุ')}</div>
+        <div class="rp-item"><strong>เลขประจำตัว (HN):</strong> ${escapeHtml(record.hn || 'ไม่ระบุ')}</div>
+        <div class="rp-item"><strong>อายุ / เพศ:</strong> ${escapeHtml(record.age || '-')} / ${escapeHtml(record.gender || '-')}</div>
+        <div class="rp-item"><strong>วันที่ตรวจ:</strong> ${escapeHtml(dateStr)}</div>
+        <div class="rp-item" style="grid-column: span 2;"><strong>สิทธิการรักษา:</strong> ${escapeHtml(record.coverage || '-')}</div>
+        <div class="rp-item" style="grid-column: span 2;"><strong>แพทย์ผู้ตรวจ:</strong> ${escapeHtml(record.doctor || '-')}</div>
+      </div>
+
+      <div class="report-section">
+        <div class="report-section-title"><span>[S] ประวัติและอาการสำคัญ (Subjective)</span></div>
+        <div class="report-section-body">
+          <div class="report-field-row"><strong>อาการสำคัญ (Chief Complaint):</strong> ${escapeHtml(record.chiefComplaint || '-')}</div>
+          <div class="report-field-row"><strong>ประวัติปัจจุบัน (Present Illness):</strong> ${escapeHtml(record.presentIllness || '-')}</div>
+          <div class="report-field-row"><strong>ประวัติอดีต/แพ้ยา (Past History & Allergy):</strong> ${escapeHtml(record.pastHistory || 'ปฏิเสธโรคประจำตัวและการแพ้ยา')}</div>
+        </div>
+      </div>
+
+      <div class="report-section">
+        <div class="report-section-title"><span>[O] ผลการตรวจร่างกายและการตรวจพิเศษ (Objective)</span></div>
+        <div class="report-section-body">
+          <div class="report-field-row"><strong>การตรวจร่างกาย (Physical Examination):</strong> ${escapeHtml(record.physicalExam || '-')}</div>
+          ${examTableHtml}
+          <div class="report-field-row" style="margin-top: 6px;"><strong>ผลภาพถ่ายรังสี / ภาพสแกน (Imaging & Labs):</strong> ${escapeHtml(record.imagingLabs || '-')}</div>
+        </div>
+      </div>
+
+      <div class="report-section">
+        <div class="report-section-title"><span>[A] การวินิจฉัยโรค (Assessment)</span></div>
+        <div class="report-section-body">
+          <div class="report-field-row"><strong>การวินิจฉัยโรคหลัก (Primary Diagnosis):</strong> <span style="font-size: 0.92rem; font-weight: 700; color: #1e40af;">${escapeHtml(record.primaryDiagnosis || '-')}</span></div>
+          ${record.differentialDx ? `<div class="report-field-row"><strong>การวินิจฉัยแยกโรค (Differential Dx):</strong> ${escapeHtml(record.differentialDx)}</div>` : ''}
+        </div>
+      </div>
+
+      <div class="report-section">
+        <div class="report-section-title"><span>[P] แผนการรักษาและคำแนะนำ (Plan & Management)</span></div>
+        <div class="report-section-body">
+          <div class="report-field-row"><strong>การรักษา ยา และหัตถการ (Treatment & Medication):</strong><br>${escapeHtml(record.treatmentPlan || '-').replace(/\n/g, '<br>')}</div>
+          <div class="report-field-row" style="margin-top: 6px;"><strong>คำแนะนำสำหรับผู้ป่วย (Patient Advice):</strong> ${escapeHtml(record.patientAdvice || '-')}</div>
+          <div class="report-field-row" style="margin-top: 6px;"><strong>การนัดตรวจติดตาม (Follow-up):</strong> <strong style="color: #b91c1c;">${escapeHtml(record.followUp || '-')}</strong></div>
+        </div>
+      </div>
+
+      <div class="report-sign-box">
+        <div class="report-signature-block">
+          <div class="report-sign-line"></div>
+          <div class="report-doctor-name">(${escapeHtml(record.doctor || '..........................................................')})</div>
+          <div class="report-doctor-role">แพทย์ผู้ตรวจรักษา / ศัลยแพทย์ออร์โธปิดิกส์</div>
+          <div style="font-size: 0.72rem; color: #64748b; margin-top: 2px;">วันที่ออกรายงาน: ${printDate}</div>
+        </div>
+      </div>
+    `;
+
+    elems.printReportModal.showModal();
+  }
+
+  function startNewCase() {
+    clearAllData();
+    state.currentCaseId = null;
+
+    if (elems.patientName) elems.patientName.value = '';
+    if (elems.patientHn) elems.patientHn.value = '';
+    if (elems.patientAge) elems.patientAge.value = '';
+    if (elems.patientGender) elems.patientGender.value = '';
+    if (elems.patientDate) elems.patientDate.valueAsDate = new Date();
+
+    if (elems.activeCaseTag) {
+      elems.activeCaseTag.textContent = 'เคสใหม่ (ยังไม่บันทึก)';
+      elems.activeCaseTag.classList.remove('is-saved');
+    }
+
+    const firstTabBtn = document.querySelector('.tab-btn[data-tab="soapTab"]');
+    if (firstTabBtn) firstTabBtn.click();
+
+    showToast('เริ่มตรวจคนไข้เคสใหม่เรียบร้อยแล้ว', 'success');
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
   function clearAllData() {
     sttEngine.stop();
     ttsEngine.stop();
@@ -608,6 +1182,17 @@ Recorded via OrthoVoice Ambient Scribe System (Confidential Medical Record)
     state.interimTurn = null;
     state.currentCaseId = null;
     state.parsedData = null;
+
+    if (elems.patientName) elems.patientName.value = '';
+    if (elems.patientHn) elems.patientHn.value = '';
+    if (elems.patientAge) elems.patientAge.value = '';
+    if (elems.patientGender) elems.patientGender.value = '';
+    if (elems.patientDate) elems.patientDate.valueAsDate = new Date();
+
+    if (elems.activeCaseTag) {
+      elems.activeCaseTag.textContent = 'เคสใหม่ (ยังไม่บันทึก)';
+      elems.activeCaseTag.classList.remove('is-saved');
+    }
 
     renderTranscriptStream();
     renderEntityChips({ anatomy: [], tests: [], symptoms: [], diagnoses: [], treatments: [] });

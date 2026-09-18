@@ -1568,46 +1568,541 @@ h1, h2, h3, h4, h5 {
   border-left-color: var(--color-success);
 }
 
-.toast.toast-error {
-  border-left-color: var(--color-danger);
+/* Badge Count Pill in Header Buttons */
+.badge-count-pill {
+  background: var(--color-primary);
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  margin-left: 4px;
+  line-height: 1.2;
 }
 
-@keyframes slideInToast {
-  from { transform: translateX(100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+/* ==========================================================================
+   Patient Demographics Bar (White & Medical Blue Theme)
+   ========================================================================== */
+.patient-info-bar {
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition-fast);
 }
 
-/* Print Stylesheet for OPD Card */
+.patient-info-bar:focus-within {
+  border-color: #93c5fd;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+}
+
+.patient-bar-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.patient-bar-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.patient-bar-title .p-icon {
+  font-size: 0.95rem;
+}
+
+.active-case-tag {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.active-case-tag.is-saved {
+  background: #ecfdf5;
+  color: #065f46;
+  border-color: #a7f3d0;
+}
+
+.patient-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.patient-bar-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1.1fr 0.8fr 0.9fr 1.2fr 1.8fr 1.4fr;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+@media (max-width: 1200px) {
+  .patient-bar-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .patient-bar-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.p-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.p-field label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.p-field input, .p-field select {
+  background: #f8fafc;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 5px 8px;
+  font-family: var(--font-thai);
+  font-size: 0.78rem;
+  color: var(--text-main);
+  outline: none;
+  transition: all var(--transition-fast);
+  width: 100%;
+}
+
+.p-field input:focus, .p-field select:focus {
+  background: #ffffff;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+}
+
+/* ==========================================================================
+   Saved Cases Modal (Sheets Database)
+   ========================================================================== */
+.modal-dialog.modal-lg {
+  max-width: 850px;
+}
+
+.modal-dialog.modal-xl {
+  max-width: 950px;
+}
+
+.saved-cases-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.search-input-wrapper {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.search-input-wrapper svg {
+  position: absolute;
+  left: 10px;
+  color: var(--text-muted);
+}
+
+.search-input-wrapper input {
+  width: 100%;
+  padding: 7px 12px 7px 32px;
+  background: #f8fafc;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  font-family: var(--font-thai);
+  font-size: 0.82rem;
+  outline: none;
+}
+
+.search-input-wrapper input:focus {
+  border-color: var(--color-primary);
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.toolbar-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.saved-cases-container {
+  max-height: 480px;
+  overflow-y: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: #ffffff;
+}
+
+.saved-case-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background var(--transition-fast);
+  gap: 12px;
+}
+
+.saved-case-item:last-child {
+  border-bottom: none;
+}
+
+.saved-case-item:hover {
+  background: #f8fafc;
+}
+
+.case-info-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.case-header-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+
+.case-patient-name {
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--text-main);
+}
+
+.case-hn-badge {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 1px 6px;
+  background: #e2e8f0;
+  color: #334155;
+  border-radius: var(--radius-sm);
+}
+
+.case-date-text {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.case-dx-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin-bottom: 2px;
+}
+
+.case-cc-snippet {
+  font-size: 0.76rem;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.case-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   Print Preview & Official Clinical Report Sheet
+   ========================================================================== */
+.print-modal-content {
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.print-preview-body {
+  background: #64748b;
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  justify-content: center;
+}
+
+.print-paper-sheet {
+  background: #ffffff;
+  width: 100%;
+  max-width: 800px;
+  min-height: 1050px;
+  padding: 36px 44px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+  border-radius: 4px;
+  color: #0f172a;
+  font-family: 'Prompt', 'Plus Jakarta Sans', sans-serif;
+  line-height: 1.5;
+}
+
+.report-header {
+  border-bottom: 2px solid #0f172a;
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.report-hospital-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.report-hospital-info .h-logo {
+  font-size: 2.2rem;
+}
+
+.report-hospital-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+.report-hospital-sub {
+  font-size: 0.82rem;
+  color: #475569;
+}
+
+.report-doc-badge {
+  text-align: right;
+}
+
+.report-doc-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #1e40af;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.report-doc-id {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.report-patient-box {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-bottom: 18px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  font-size: 0.82rem;
+}
+
+.report-patient-box .rp-item strong {
+  color: #334155;
+  font-weight: 600;
+}
+
+.report-section {
+  margin-bottom: 16px;
+}
+
+.report-section-title {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #1e40af;
+  border-bottom: 1px solid #94a3b8;
+  padding-bottom: 3px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.report-section-body {
+  font-size: 0.83rem;
+  color: #1e293b;
+  line-height: 1.6;
+}
+
+.report-field-row {
+  margin-bottom: 5px;
+}
+
+.report-field-row strong {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.report-exam-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 6px;
+  margin-bottom: 6px;
+  font-size: 0.78rem;
+}
+
+.report-exam-table th, .report-exam-table td {
+  border: 1px solid #cbd5e1;
+  padding: 5px 8px;
+  text-align: left;
+}
+
+.report-exam-table th {
+  background: #f1f5f9;
+  color: #1e293b;
+  font-weight: 700;
+  width: 28%;
+}
+
+.report-sign-box {
+  margin-top: 36px;
+  padding-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+  page-break-inside: avoid;
+}
+
+.report-signature-block {
+  text-align: center;
+  width: 250px;
+}
+
+.report-sign-line {
+  border-bottom: 1px dotted #475569;
+  height: 40px;
+  margin-bottom: 6px;
+}
+
+.report-doctor-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.report-doctor-role {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+/* ==========================================================================
+   Master Print Stylesheet (Direct A4 Print)
+   ========================================================================== */
 @media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm 15mm;
+  }
+
   body {
     background: #ffffff !important;
     color: #000000 !important;
+    font-size: 11pt !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
-  .app-header, .panel-left, .tabs-container, .export-actions, .app-footer, .modal-dialog, .toast-container {
+
+  /* Hide absolutely all screen UI */
+  .app-container,
+  .app-header,
+  .app-main,
+  .app-footer,
+  .toast-container,
+  .no-print,
+  dialog:not(#printReportModal),
+  #printReportModal .modal-header,
+  #printReportModal .modal-footer {
     display: none !important;
   }
-  .app-main, .panel-right {
+
+  /* Make print modal and paper sheet full view */
+  #printReportModal {
     display: block !important;
-    padding: 0 !important;
+    position: static !important;
     border: none !important;
     box-shadow: none !important;
     background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
-  .tab-content {
+
+  .print-modal-content,
+  .print-preview-body {
     display: block !important;
-  }
-  #orthoExamTab, #voiceAssistantTab, #exportTab {
-    display: none !important;
-  }
-  .soap-card {
-    background: #ffffff !important;
-    border: 1px solid #cccccc !important;
-    page-break-inside: avoid;
-    margin-bottom: 12px;
-  }
-  .soap-textarea, .soap-input {
-    background: #ffffff !important;
-    color: #000000 !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
     border: none !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
+
+  .print-paper-sheet {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: #000000 !important;
+    background: #ffffff !important;
+  }
+
+  .report-header {
+    border-bottom: 2px solid #000000 !important;
+  }
+
+  .report-patient-box {
+    background: #f8fafc !important;
+    border: 1px solid #000000 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .report-section-title {
+    color: #000000 !important;
+    border-bottom: 1px solid #000000 !important;
+    font-weight: bold !important;
+  }
+
+  .report-exam-table th, .report-exam-table td {
+    border: 1px solid #000000 !important;
+  }
+
+  .report-exam-table th {
+    background: #f1f5f9 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .report-sign-box {
+    page-break-inside: avoid !important;
   }
 }
+

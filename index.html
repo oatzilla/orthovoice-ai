@@ -44,8 +44,47 @@
           <span class="status-label">พร้อมรับฟัง (Ready)</span>
         </div>
 
+        <!-- Save Case to Google Sheet / DB -->
+        <button id="btnSaveCase" class="btn btn-primary btn-sm" title="บันทึกเคสลง Google Sheet / ฐานข้อมูล">
+          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+            <polyline points="7 3 7 8 15 8"></polyline>
+          </svg>
+          <span id="btnSaveCaseText">บันทึกเคส (Save)</span>
+        </button>
+
+        <!-- Saved Cases Archive -->
+        <button id="btnOpenSavedCases" class="btn btn-secondary btn-sm" title="เปิดดูรายการเคสที่บันทึกไว้ใน Google Sheet">
+          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+          </svg>
+          <span>ประวัติเคส (Sheets)</span>
+          <span class="badge-count-pill" id="savedCasesCountBadge">0</span>
+        </button>
+
+        <!-- Print OPD Report Button -->
+        <button id="btnPrintReport" class="btn btn-secondary btn-sm" title="พิมพ์รายงานการตรวจรักษาผู้ป่วยนอก (OPD Clinical Report)">
+          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+            <rect x="6" y="14" width="12" height="8"></rect>
+          </svg>
+          <span>พิมพ์รายงาน</span>
+        </button>
+
+        <!-- New Case / Reset -->
+        <button id="btnNewCase" class="btn btn-ghost btn-sm" title="สร้างเคสใหม่ / ล้างข้อมูลเพื่อตรวจคนไข้ถัดไป">
+          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="16"></line>
+            <line x1="8" y1="12" x2="16" y2="12"></line>
+          </svg>
+          <span>เคสใหม่</span>
+        </button>
+
         <!-- Gemini API Key Modal Trigger -->
-        <button id="btnOpenConfig" class="btn btn-ghost" title="ตั้งค่าระบบ / API Key">
+        <button id="btnOpenConfig" class="btn btn-ghost" title="ตั้งค่าระบบ / Google Sheet & API Key">
           <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
             <circle cx="12" cy="12" r="3"></circle>
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
@@ -54,7 +93,7 @@
         </button>
 
         <!-- Clear All Button -->
-        <button id="btnClearAll" class="btn btn-ghost btn-danger-hover" title="ล้างข้อมูลทั้งหมดเพื่อเริ่มเคสใหม่">
+        <button id="btnClearAll" class="btn btn-ghost btn-danger-hover" title="ล้างข้อมูลในฟอร์มปัจจุบัน">
           <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
             <polyline points="3 6 5 6 21 6"></polyline>
             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -158,7 +197,55 @@
 
       <!-- RIGHT PANEL: Structured Orthopedic Medical Record & Voice Readback -->
       <section class="panel panel-right">
-        
+
+        <!-- Patient Demographics Bar (Fully Editable Anytime) -->
+        <div class="patient-info-bar" id="patientInfoBar">
+          <div class="patient-bar-top">
+            <div class="patient-bar-title">
+              <span class="p-icon">👤</span>
+              <span class="p-title-text">ข้อมูลผู้ป่วย (Patient Demographics)</span>
+              <span class="active-case-tag" id="activeCaseTag">เคสใหม่ (ยังไม่บันทึก)</span>
+            </div>
+            <div class="patient-bar-actions">
+              <button type="button" id="btnQuickDemoPatient" class="btn-text-action" title="กรอกชื่อคนไข้ตัวอย่างเพื่อทดสอบ">+ ตัวอย่างชื่อคนไข้</button>
+            </div>
+          </div>
+          <div class="patient-bar-grid">
+            <div class="p-field p-name">
+              <label for="patientName">ชื่อ-นามสกุล:</label>
+              <input type="text" id="patientName" placeholder="เช่น นายสมศักดิ์ รักสงบ" autocomplete="off" />
+            </div>
+            <div class="p-field p-hn">
+              <label for="patientHn">เลขประจำตัว (HN):</label>
+              <input type="text" id="patientHn" placeholder="เช่น 67-004291" autocomplete="off" />
+            </div>
+            <div class="p-field p-age">
+              <label for="patientAge">อายุ:</label>
+              <input type="text" id="patientAge" placeholder="เช่น 56 ปี" autocomplete="off" />
+            </div>
+            <div class="p-field p-gender">
+              <label for="patientGender">เพศ:</label>
+              <select id="patientGender">
+                <option value="">-</option>
+                <option value="ชาย">ชาย</option>
+                <option value="หญิง">หญิง</option>
+              </select>
+            </div>
+            <div class="p-field p-date">
+              <label for="patientDate">วันที่ตรวจ:</label>
+              <input type="date" id="patientDate" />
+            </div>
+            <div class="p-field p-doctor">
+              <label for="patientDoctor">แพทย์ผู้ตรวจ:</label>
+              <input type="text" id="patientDoctor" value="นพ. กฤษดา (ศัลยแพทย์ออร์โธปิดิกส์)" placeholder="ชื่อแพทย์ผู้ตรวจ" />
+            </div>
+            <div class="p-field p-coverage">
+              <label for="patientCoverage">สิทธิการรักษา:</label>
+              <input type="text" id="patientCoverage" value="ชำระเงินเอง / ประกันสุขภาพ" placeholder="สิทธิการรักษา" />
+            </div>
+          </div>
+        </div>
+
         <!-- Record View Navigation Tabs -->
         <div class="tabs-container">
           <button class="tab-btn active" data-tab="soapTab">
@@ -512,9 +599,133 @@
           </div>
         </div>
 
+        <hr style="border: 0; border-top: 1px solid var(--border-subtle); margin: 16px 0;">
+
+        <!-- Google Sheets Database Integration -->
+        <div class="config-group">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+            <label class="config-label" style="margin-bottom: 0;">📊 ฐานข้อมูล Google Sheets (Cloud Database):</label>
+            <a href="https://docs.google.com/spreadsheets/d/1YX9M8P0VoY5k47Gx2_OK-okoPN7oMcylC00zcCb_x_4/edit?usp=sharing" target="_blank" class="btn-text-action" style="font-size: 0.78rem;">
+              ↗ เปิดดู Google Sheet ของคุณหมอ
+            </a>
+          </div>
+          <div style="background: #f1f5f9; padding: 10px 12px; border-radius: var(--radius-md); font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 8px;">
+            <strong>Google Sheet ID:</strong> <code style="font-family: var(--font-mono); color: var(--color-primary);">1YX9M8P0VoY5k47Gx2_OK-okoPN7oMcylC00zcCb_x_4</code>
+          </div>
+
+          <label class="config-label" for="sheetWebAppUrlInput" style="font-size: 0.82rem;">Google Apps Script Web App URL (สำหรับบันทึกและอ่านข้อมูล):</label>
+          <input type="url" id="sheetWebAppUrlInput" class="soap-input" placeholder="https://script.google.com/macros/s/.../exec" />
+          <p class="config-help">
+            ระบบจัดเก็บเวชระเบียนลงเครื่องทันทีเสมอ และสามารถซิงค์ขึ้น Google Sheet แบบเรียลไทม์ผ่าน Google Apps Script (Web App) ฟรี ปลอดภัย และไม่เสียค่าบริการ
+          </p>
+
+          <div style="margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap;">
+            <button type="button" id="btnCopyAppsScript" class="btn btn-secondary btn-sm">
+              📋 คัดลอกโค้ด Google Apps Script (1-Click)
+            </button>
+            <button type="button" id="btnTestSheetSync" class="btn btn-ghost btn-sm">
+              ⚡ ทดสอบการเชื่อมต่อ Google Sheets
+            </button>
+          </div>
+
+          <details style="margin-top: 10px; font-size: 0.78rem; color: var(--text-secondary); background: #f8fafc; padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+            <summary style="cursor: pointer; font-weight: 600; color: var(--color-primary);">📖 วิธีเชื่อมต่อ Google Sheet ใน 3 ขั้นตอนง่ายๆ</summary>
+            <ol style="margin-top: 6px; padding-left: 20px; line-height: 1.6;">
+              <li>กดปุ่ม <strong>"คัดลอกโค้ด Google Apps Script"</strong> ด้านบน</li>
+              <li>เปิด Google Sheet ของคุณหมอ แล้วไปที่เมนู <strong>ส่วนขยาย (Extensions) &gt; Apps Script</strong> วางโค้ดลงไปแล้วกดบันทึก</li>
+              <li>กดปุ่มสีน้ำเงิน <strong>การทำให้ใช้งานได้ (Deploy) &gt; การทำให้ใช้งานได้ใหม่ (New Deployment)</strong> เลือกประเภท <strong>เว็บแอป (Web App)</strong> กำหนดสิทธิ์เป็น <strong>ทุกคน (Anyone)</strong> แล้วนำ URL ที่ได้มาวางในช่องด้านบน</li>
+            </ol>
+          </details>
+        </div>
+
       </div>
       <div class="modal-footer">
         <button id="btnSaveConfig" class="btn btn-primary">บันทึกการตั้งค่า</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Saved Cases Archive Modal (Google Sheets & Local Storage) -->
+  <dialog id="savedCasesModal" class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 1.25rem;">📁</span>
+          <div>
+            <h3 style="margin: 0; font-size: 1.1rem;">ประวัติเวชระเบียนที่บันทึกไว้ (Patient Records Archive)</h3>
+            <div style="font-size: 0.75rem; color: var(--text-secondary);">ฐานข้อมูล Google Sheets & Local Storage — สามารถเปิดกลับมาแก้ไขได้ทุกเคส</div>
+          </div>
+        </div>
+        <button id="btnCloseSavedCases" class="btn-close" aria-label="ปิด">&times;</button>
+      </div>
+
+      <div class="modal-body" style="padding: 16px 20px;">
+        <!-- Top Toolbar -->
+        <div class="saved-cases-toolbar">
+          <div class="search-input-wrapper">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="inputSearchCases" placeholder="ค้นหาตามชื่อผู้ป่วย, HN, หรือโรคที่วินิจฉัย..." autocomplete="off" />
+          </div>
+          <div class="toolbar-actions">
+            <button id="btnSyncCasesNow" class="btn btn-secondary btn-sm" title="ดึงข้อมูลล่าสุดจาก Google Sheet">
+              <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+              ซิงค์ข้อมูลชีต
+            </button>
+            <a href="https://docs.google.com/spreadsheets/d/1YX9M8P0VoY5k47Gx2_OK-okoPN7oMcylC00zcCb_x_4/edit?usp=sharing" target="_blank" class="btn btn-ghost btn-sm" title="เปิดตาราง Google Sheet ในแท็บใหม่">
+              📊 ดูตาราง Sheet
+            </a>
+          </div>
+        </div>
+
+        <!-- Cases Table / Card Container -->
+        <div class="saved-cases-container" id="savedCasesContainer">
+          <!-- Dynamically populated by JS -->
+          <div class="empty-state" style="padding: 40px 20px;">
+            <div class="empty-icon">📂</div>
+            <h4>ยังไม่มีประวัติเคสที่บันทึกไว้</h4>
+            <p>เมื่อตรวจรักษาผู้ป่วยเสร็จแล้ว ให้กดปุ่ม <strong>"💾 บันทึกเคส"</strong> ด้านบนเพื่อจัดเก็บข้อมูลลง Google Sheet</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="justify-content: space-between;">
+        <div style="font-size: 0.78rem; color: var(--text-secondary);" id="savedCasesCountLabel">
+          จำนวน 0 เคส
+        </div>
+        <button id="btnCloseSavedCasesFooter" class="btn btn-secondary">ปิดหน้าต่าง</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Official Print Report Modal (A4 OPD Summary Preview) -->
+  <dialog id="printReportModal" class="modal-dialog modal-xl">
+    <div class="modal-content print-modal-content">
+      <div class="modal-header no-print">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 1.25rem;">🖨️</span>
+          <div>
+            <h3 style="margin: 0; font-size: 1.1rem;">ตัวอย่างรายงานการตรวจรักษาผู้ป่วยนอก (OPD Clinical Report Preview)</h3>
+            <div style="font-size: 0.75rem; color: var(--text-secondary);">พร้อมพิมพ์ลงกระดาษ A4 หรือบันทึกเป็น PDF มาตรฐานโรงพยาบาล</div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button id="btnPrintModalConfirm" class="btn btn-primary btn-sm">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+            สั่งพิมพ์ / บันทึก PDF
+          </button>
+          <button id="btnBackToEditFromPrint" class="btn btn-secondary btn-sm" title="กลับไปแก้ไขรายละเอียดในหน้าฟอร์ม">
+            ✏️ แก้ไขรายละเอียด
+          </button>
+          <button id="btnClosePrintReport" class="btn-close" aria-label="ปิด">&times;</button>
+        </div>
+      </div>
+
+      <!-- Scrollable Document Preview Body -->
+      <div class="modal-body print-preview-body" id="printPreviewBody">
+        <!-- Printable Paper A4 Sheet -->
+        <div class="print-paper-sheet" id="printPaperSheet">
+          <!-- Dynamically populated by JS renderPrintReport() -->
+        </div>
       </div>
     </div>
   </dialog>
@@ -528,6 +739,7 @@
   <script src="js/gemini_service.js"></script>
   <script src="js/speech_stt.js"></script>
   <script src="js/voice_tts.js"></script>
-  <script src="js/app.js?v=2.1"></script>
+  <script src="js/sheets_db.js"></script>
+  <script src="js/app.js?v=2.2"></script>
 </body>
 </html>
