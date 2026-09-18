@@ -200,11 +200,11 @@ class SpeechSTTEngine {
       const height = this.canvas.height;
       this.canvasCtx.clearRect(0, 0, width, height);
 
-      // Create glowing gradient
+      // Create clean medical blue gradient
       const gradient = this.canvasCtx.createLinearGradient(0, height, width, 0);
-      gradient.addColorStop(0, '#00d2ff');
-      gradient.addColorStop(0.5, '#3a7bd5');
-      gradient.addColorStop(1, '#00f2fe');
+      gradient.addColorStop(0, '#1d4ed8');
+      gradient.addColorStop(0.5, '#2563eb');
+      gradient.addColorStop(1, '#3b82f6');
 
       const barWidth = (width / bufferLength) * 2.2;
       let barHeight;
@@ -214,8 +214,8 @@ class SpeechSTTEngine {
         barHeight = (dataArray[i] / 255) * height * 0.85;
 
         this.canvasCtx.fillStyle = gradient;
-        this.canvasCtx.shadowBlur = 6;
-        this.canvasCtx.shadowColor = 'rgba(0, 210, 255, 0.4)';
+        this.canvasCtx.shadowBlur = 4;
+        this.canvasCtx.shadowColor = 'rgba(37, 99, 235, 0.25)';
         this.canvasCtx.fillRect(x, height - barHeight - 4, barWidth - 1, barHeight + 4);
 
         x += barWidth + 1;
@@ -239,9 +239,9 @@ class SpeechSTTEngine {
       this.canvasCtx.clearRect(0, 0, width, height);
 
       this.canvasCtx.lineWidth = 2.5;
-      this.canvasCtx.strokeStyle = '#00d2ff';
-      this.canvasCtx.shadowBlur = 8;
-      this.canvasCtx.shadowColor = 'rgba(0, 210, 255, 0.6)';
+      this.canvasCtx.strokeStyle = '#2563eb';
+      this.canvasCtx.shadowBlur = 5;
+      this.canvasCtx.shadowColor = 'rgba(37, 99, 235, 0.3)';
       this.canvasCtx.beginPath();
 
       const numPoints = 80;
