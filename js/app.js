@@ -64,6 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btnSyncCasesNow: document.getElementById('btnSyncCasesNow'),
     savedCasesContainer: document.getElementById('savedCasesContainer'),
     savedCasesCountLabel: document.getElementById('savedCasesCountLabel'),
+    sheetSyncBanner: document.getElementById('sheetSyncBanner'),
 
     // Print Report Modal
     printReportModal: document.getElementById('printReportModal'),
@@ -906,9 +907,9 @@ Recorded via OrthoVoice Ambient Scribe System (Confidential Medical Record)
       updateSavedCasesBadge();
 
       if (res.cloudSynced) {
-        showToast(`✅ บันทึกเคส ${res.caseId} สำเร็จและซิงค์ขึ้น Google Sheet แล้ว`, 'success');
+        showToast(`✅ บันทึกเคส ${res.caseId} สำเร็จและส่งเข้า Google Sheet แล้ว`, 'success');
       } else {
-        showToast(`💾 บันทึกเคส ${res.caseId} ในเครื่องเรียบร้อยแล้ว`, 'success');
+        showToast(`💾 บันทึกเคส ${res.caseId} ในเครื่องเรียบร้อยแล้ว (ตั้งค่าในเมนู "ตั้งค่า" เพื่อส่งเข้า Google Sheet)`, 'info');
       }
     } catch (err) {
       console.error('Error saving case:', err);
@@ -920,6 +921,29 @@ Recorded via OrthoVoice Ambient Scribe System (Confidential Medical Record)
   }
 
   async function renderSavedCasesList(filterText = '') {
+    if (elems.sheetSyncBanner) {
+      if (window.OrthoSheetsDB && window.OrthoSheetsDB.webAppUrl) {
+        elems.sheetSyncBanner.className = 'sheet-sync-banner synced';
+        elems.sheetSyncBanner.innerHTML = `
+          <span>🟢 <strong>ซิงค์กับ Google Sheet อัตโนมัติ</strong> (ระบบเชื่อมต่อกับชีตของคุณหมอแล้ว)</span>
+          <a href="https://docs.google.com/spreadsheets/d/1YX9M8P0VoY5k47Gx2_OK-okoPN7oMcylC00zcCb_x_4/edit?usp=sharing" target="_blank" class="btn-text-action" style="color: inherit; text-decoration: underline;">เปิดตาราง Google Sheet ↗</a>
+        `;
+      } else {
+        elems.sheetSyncBanner.className = 'sheet-sync-banner local-only';
+        elems.sheetSyncBanner.innerHTML = `
+          <span>💾 <strong>ข้อมูลถูกจัดเก็บในเครื่องของคุณหมอ (Local Storage)</strong> — หากต้องการให้ข้อมูลขึ้นตาราง Google Sheet โดยตรง ต้องเชื่อมต่อ Apps Script</span>
+          <button id="btnBannerSetupSheet" class="btn btn-primary btn-sm" style="font-size: 0.75rem; padding: 4px 10px;">⚡ เชื่อมต่อ Google Sheet</button>
+        `;
+        const btnSetup = document.getElementById('btnBannerSetupSheet');
+        if (btnSetup) {
+          btnSetup.addEventListener('click', () => {
+            elems.savedCasesModal.close();
+            elems.configDialog.showModal();
+          });
+        }
+      }
+    }
+
     if (!elems.savedCasesContainer) return;
     elems.savedCasesContainer.innerHTML = '<div style="padding: 24px; text-align: center; color: var(--text-secondary);">กำลังโหลดข้อมูลเวชระเบียน...</div>';
 

@@ -1747,6 +1747,30 @@ h1, h2, h3, h4, h5 {
   gap: 8px;
 }
 
+.sheet-sync-banner {
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  font-size: 0.8rem;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sheet-sync-banner.synced {
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #065f46;
+}
+
+.sheet-sync-banner.local-only {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+}
+
 .saved-cases-container {
   max-height: 480px;
   overflow-y: auto;
