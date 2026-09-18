@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="css/style.css?v=2.0">
+  <link rel="stylesheet" href="css/style.css?v=2.1">
 </head>
 <body class="theme-light">
   <!-- Main Application Wrapper -->
@@ -42,23 +42,6 @@
         <div class="status-indicator" id="systemStatus">
           <span class="pulse-dot"></span>
           <span class="status-label">พร้อมรับฟัง (Ready)</span>
-        </div>
-
-        <!-- Scenario Selector Quick Action -->
-        <div class="scenario-dropdown-wrapper">
-          <label for="scenarioSelect" class="sr-only">เลือกเคสตัวอย่าง</label>
-          <select id="scenarioSelect" class="scenario-select" title="เลือกเคสตัวอย่างเพื่อจำลองการสนทนา">
-            <option value="">⚡ เลือกเคสตัวอย่าง (Demo Scenarios)...</option>
-            <option value="oa_knee">🦵 1. ข้อเข่าเสื่อม (OA Knee Grade 3)</option>
-            <option value="acl_tear">🏃‍♂️ 2. เอ็นไขว้หน้าข้อเข่าฉีก (ACL Tear + Meniscus)</option>
-            <option value="lumbar_hnp">⚡ 3. หมอนรองกระดูกทับเส้น (Lumbar HNP / Sciatica)</option>
-            <option value="rotator_cuff">💪 4. เอ็นข้อไหล่ฉีกขาด (Rotator Cuff Tear)</option>
-            <option value="trigger_finger">🖐️ 5. โรคนิ้วล็อค (Trigger Finger Gr.3)</option>
-          </select>
-          <button id="btnLoadScenario" class="btn btn-secondary btn-sm" title="โหลดและจำลองการสนทนา">
-            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-            จำลองสนทนา
-          </button>
         </div>
 
         <!-- Gemini API Key Modal Trigger -->
@@ -126,18 +109,6 @@
           <div class="speech-hints">
             <span class="hint-item">💡 สามารถพูดภาษาไทยปนศัพท์เฉพาะทางแพทย์ได้ เช่น <em>Lachman test, Medial joint line, OA knee, Spurling, ROM</em></span>
           </div>
-
-          <!-- Quick Scenario Pills -->
-          <div class="quick-scenarios-bar">
-            <span class="quick-scenarios-label">⚡ เคสตัวอย่างตรวจรักษา (คลิกเพื่อทดสอบทันที):</span>
-            <div class="quick-scenarios-pills">
-              <button class="pill-btn" data-scenario="oa_knee" title="ข้อเข่าเสื่อม Grade 3">🦵 ข้อเข่าเสื่อม</button>
-              <button class="pill-btn" data-scenario="acl_tear" title="เอ็นไขว้หน้าข้อเข่าฉีกขาด">🏃‍♂️ เอ็นไขว้หน้าฉีก</button>
-              <button class="pill-btn" data-scenario="lumbar_hnp" title="หมอนรองกระดูกทับเส้นประสาท">⚡ หมอนรองทับเส้น</button>
-              <button class="pill-btn" data-scenario="rotator_cuff" title="เอ็นข้อไหล่ฉีกขาด">💪 เอ็นไหล่ฉีก</button>
-              <button class="pill-btn" data-scenario="trigger_finger" title="โรคนิ้วล็อค">🖐️ นิ้วล็อค</button>
-            </div>
-          </div>
         </div>
 
         <!-- Live Dialogue & Transcript Stream -->
@@ -157,8 +128,8 @@
           <div class="transcript-stream" id="transcriptStream">
             <div class="empty-state" id="transcriptEmptyState">
               <div class="empty-icon">🩺</div>
-              <h4>ยังไม่มีเสียงหรือบทสนทนา</h4>
-              <p>กดปุ่ม <strong>"เริ่มรับฟังเสียง"</strong> เพื่อให้แพทย์และผู้ป่วยเริ่มสนทนา<br>หรือเลือก <strong>"เคสตัวอย่าง (Demo)"</strong> ด้านบนเพื่อทดสอบการทำงานทันที</p>
+              <h4>พร้อมเริ่มบันทึกการตรวจรักษา</h4>
+              <p>กดปุ่ม <strong>"เริ่มรับฟังเสียง"</strong> เพื่อให้แพทย์และผู้ป่วยเริ่มสนทนา<br>หรือกดปุ่ม <strong>"+ พิมพ์เอง"</strong> เพื่อพิมพ์บันทึกประวัติการตรวจ</p>
             </div>
           </div>
 
@@ -553,11 +524,10 @@
 
   <!-- Application Scripts -->
   <script src="js/ortho_knowledge.js"></script>
-  <script src="js/scenarios.js"></script>
   <script src="js/parser.js"></script>
   <script src="js/gemini_service.js"></script>
   <script src="js/speech_stt.js"></script>
   <script src="js/voice_tts.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/app.js?v=2.1"></script>
 </body>
 </html>

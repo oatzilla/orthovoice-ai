@@ -24,8 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const elems = {
     // Status & Header
     systemStatus: document.getElementById('systemStatus'),
-    scenarioSelect: document.getElementById('scenarioSelect'),
-    btnLoadScenario: document.getElementById('btnLoadScenario'),
     btnOpenConfig: document.getElementById('btnOpenConfig'),
     btnClearAll: document.getElementById('btnClearAll'),
     configDialog: document.getElementById('configDialog'),
@@ -191,33 +189,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Load Preset Scenario
-  elems.btnLoadScenario.addEventListener('click', () => {
-    let caseKey = elems.scenarioSelect.value;
-    if (!caseKey) {
-      caseKey = 'oa_knee';
-      elems.scenarioSelect.value = 'oa_knee';
-    }
-    loadPresetScenario(caseKey);
-  });
-
-  elems.scenarioSelect.addEventListener('change', () => {
-    if (elems.scenarioSelect.value) {
-      loadPresetScenario(elems.scenarioSelect.value);
-    }
-  });
-
-  // Quick Scenario Pills (1-Click Instant Demo)
-  document.querySelectorAll('.pill-btn').forEach(pill => {
-    pill.addEventListener('click', () => {
-      const scenarioKey = pill.getAttribute('data-scenario');
-      if (scenarioKey) {
-        if (elems.scenarioSelect) elems.scenarioSelect.value = scenarioKey;
-        loadPresetScenario(scenarioKey);
-      }
-    });
-  });
-
   // Clear All
   elems.btnClearAll.addEventListener('click', () => {
     if (confirm('คุณต้องการล้างข้อมูลการตรวจและเริ่มเคสใหม่หรือไม่?')) {
@@ -324,7 +295,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ==========================================================================
-  // Core Business Logic: Speech Handling & Scenario Loading
+  // Core Business Logic: Speech Handling
   // ==========================================================================
 
   function handleTranscriptUpdate(result) {
@@ -630,39 +601,6 @@ Recorded via OrthoVoice Ambient Scribe System (Confidential Medical Record)
     elems.emrPreviewText.textContent = emrText;
   }
 
-  // ==========================================================================
-  // Preset Scenario Loader (Demo Showcase)
-  // ==========================================================================
-
-  function loadPresetScenario(caseKey) {
-    const scenario = window.ORTHO_SCENARIOS ? window.ORTHO_SCENARIOS[caseKey] : null;
-    if (!scenario) return;
-
-    // Stop current listening if active
-    sttEngine.stop();
-
-    // Clear state
-    state.dialogueTurns = [];
-    state.currentCaseId = caseKey;
-
-    // Simulate animated stream of dialogue turns
-    let turnIndex = 0;
-    elems.transcriptStream.innerHTML = '';
-    updateRecordingStatus('recording', `กำลังจำลองบทสนทนา: ${scenario.title}`);
-
-    const interval = setInterval(() => {
-      if (turnIndex < scenario.dialogue.length) {
-        const turn = scenario.dialogue[turnIndex];
-        addDialogueTurn(turn.speaker, turn.text);
-        turnIndex++;
-      } else {
-        clearInterval(interval);
-        updateRecordingStatus('ready', 'บทสนทนาครบถ้วน — กำลังวิเคราะห์...');
-        triggerAIAnalysis();
-      }
-    }, 450); // Fluid, natural pacing for demo
-  }
-
   function clearAllData() {
     sttEngine.stop();
     ttsEngine.stop();
@@ -671,7 +609,6 @@ Recorded via OrthoVoice Ambient Scribe System (Confidential Medical Record)
     state.currentCaseId = null;
     state.parsedData = null;
 
-    elems.scenarioSelect.value = '';
     renderTranscriptStream();
     renderEntityChips({ anatomy: [], tests: [], symptoms: [], diagnoses: [], treatments: [] });
 
